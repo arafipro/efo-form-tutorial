@@ -11,6 +11,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -40,6 +45,13 @@ const requestFormSchema = z.object({
     .regex(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/u, {
       message: "メールアドレスを入力してください",
     }),
+  postalCode: z
+    .string()
+    .min(7, { message: "郵便番号を入力してください" })
+    .regex(/^\d{7}$/u, {
+      message: "郵便番号を入力してください",
+    })
+    .optional(),
 });
 
 export default function RequestForm() {
@@ -49,6 +61,7 @@ export default function RequestForm() {
       fullName: "",
       nameKana: "",
       email: "",
+      postalCode: undefined,
     },
   });
   function onSubmit(values: z.infer<typeof requestFormSchema>) {
@@ -103,6 +116,36 @@ export default function RequestForm() {
               <FormDescription>例：yamada@gmail.com</FormDescription>
               <FormControl>
                 <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="postalCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                郵便番号&emsp;
+                <span>※任意</span>
+              </FormLabel>
+              <FormDescription>例：000-0000</FormDescription>
+              <FormControl>
+                <InputOTP maxLength={7} {...field} inputMode="numeric">
+                  <InputOTPGroup>
+                    <InputOTPSlot className="bg-white" index={0} />
+                    <InputOTPSlot className="bg-white" index={1} />
+                    <InputOTPSlot className="bg-white" index={2} />
+                  </InputOTPGroup>
+                  <span className="flex items-center justify-center">ー</span>
+                  <InputOTPGroup>
+                    <InputOTPSlot className="bg-white" index={3} />
+                    <InputOTPSlot className="bg-white" index={4} />
+                    <InputOTPSlot className="bg-white" index={5} />
+                    <InputOTPSlot className="bg-white" index={6} />
+                  </InputOTPGroup>
+                </InputOTP>
               </FormControl>
               <FormMessage />
             </FormItem>
