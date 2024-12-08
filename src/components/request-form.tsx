@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   InputOTP,
   InputOTPGroup,
@@ -51,6 +52,11 @@ const requestFormSchema = z.object({
       message: "郵便番号を入力してください",
     })
     .optional(),
+  address: z
+    .string()
+    .trim()
+    .min(1, { message: "住所を入力してください" })
+    .max(50),
 });
 
 export default function RequestForm() {
@@ -61,6 +67,7 @@ export default function RequestForm() {
       // nameKana: "",
       // email: "",
       postalCode: undefined,
+      address: "",
     },
   });
   function onSubmit(values: z.infer<typeof requestFormSchema>) {
@@ -143,12 +150,21 @@ export default function RequestForm() {
                       const response = await fetch(
                         `https://jp-postal-code-api.ttskch.com/api/v1/${postalCode}.json`
                       );
+                      if (!response.ok) {
+                        form.setError("postalCode", {
+                          type: "manual",
+                          message: "郵便番号を確認してください。",
+                        });
+                        return; // エラーが発生した場合は処理を中断
+                      }
                       const data = await response.json();
                       // 取得した住所をフォームに設定する処理を追加
-                      // 例: setValue('address', data.address);
-                      console.log(
-                        `${data.addresses[0].ja.prefecture}${data.addresses[0].ja.address1}${data.addresses[0].ja.address2}`
-                      );
+                      const address =
+                        data.addresses[0].ja.prefecture +
+                        data.addresses[0].ja.address1 +
+                        data.addresses[0].ja.address2;
+                      console.log(address);
+                      form.setValue("address", address); // 住所フィールドに設定
                     }
                   }}
                 >
@@ -165,6 +181,23 @@ export default function RequestForm() {
                     <InputOTPSlot className="bg-white" index={6} />
                   </InputOTPGroup>
                 </InputOTP>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                住所&emsp;
+                <span>※任意</span>
+              </FormLabel>
+              <FormDescription>例：</FormDescription>
+              <FormControl>
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
